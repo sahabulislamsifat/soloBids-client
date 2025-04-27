@@ -1,8 +1,17 @@
 /* eslint-disable react/prop-types */
-
 import { Link } from "react-router-dom";
 
-const JobCard = () => {
+const JobCard = ({ job }) => {
+  const {
+    job_title,
+    category,
+    description,
+    deadline,
+    min_price,
+    max_price,
+    bid_count,
+  } = job || {};
+
   return (
     <Link
       to={`/job/1`}
@@ -10,27 +19,33 @@ const JobCard = () => {
     >
       <div className="flex items-center justify-between">
         <span className="text-xs font-light text-gray-800 ">
-          Deadline: 28/05/2024
+          {/* Deadline: 28/05/2024 */}
+          {deadline}
         </span>
         <span className="px-3 py-1 text-[8px] text-blue-800 uppercase bg-blue-200 rounded-full ">
-          Web Development
+          {/* Web Development */}
+          {category}
         </span>
       </div>
 
       <div>
         <h1 className="mt-2 text-lg font-semibold text-gray-800 ">
-          E-commerce Website Development
+          {/* E-commerce Website Development */}
+          {job_title}
         </h1>
 
         <p className="mt-2 text-sm text-gray-600 ">
-          Dramatically redefine bleeding-edge infrastructures after
+          {/* Dramatically redefine bleeding-edge infrastructures after
           client-focused value. Intrinsicly seize user-centric partnerships
-          through out-of-the-box architectures. Distinctively.
+          through out-of-the-box architectures. Distinctively. */}
+          {description.substring(0, 115)}....
         </p>
         <p className="mt-2 text-sm font-bold text-gray-600 ">
-          Range: $500 - $600
+          Range: ${min_price} - ${max_price}
         </p>
-        <p className="mt-2 text-sm font-bold text-gray-600 ">Total Bids: 0</p>
+        <p className="mt-2 text-sm font-bold text-gray-600 ">
+          Total Bids: {bid_count}
+        </p>
       </div>
     </Link>
   );

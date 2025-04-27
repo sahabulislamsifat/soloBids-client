@@ -3,21 +3,25 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { AuthContext } from "../providers/AuthProvider";
 import axios from "axios";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const AddJob = () => {
   const { user } = useContext(AuthContext);
   const [startDate, setStartDate] = useState(new Date());
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const from = e.target;
+    const form = e.target;
 
-    const job_title = from.job_title.value;
-    const email = from.email.value;
-    const category = from.category.value;
-    const min_price = from.min_price.value;
-    const max_price = from.max_price.value;
-    const description = from.description.value;
+    const job_title = form.job_title.value;
+    const email = form.email.value;
+    const category = form.category.value;
+    const deadline = form.deadline.value;
+    const min_price = form.min_price.value;
+    const max_price = form.max_price.value;
+    const description = form.description.value;
 
     const fromData = {
       job_title,
@@ -27,19 +31,22 @@ const AddJob = () => {
         photo: user?.photoURL,
       },
       category,
+      description,
+      deadline,
       min_price,
       max_price,
-      description,
       bid_count: 0,
     };
     // console.log(fromData);
-
-    // make a post request
-    const { data } = await axios.post(
-      `${import.meta.env.VITE_API_URL}/add-job`,
-      fromData
-    );
-    console.log(data);
+    try {
+      // make a post request
+      await axios.post(`${import.meta.env.VITE_API_URL}/add-job`, fromData);
+      form.reset();
+      toast.success("Job Added Successfully");
+      navigate("/my-posted-jobs");
+    } catch (err) {
+      toast.error(err.message);
+    }
   };
 
   return (
@@ -83,6 +90,7 @@ const AddJob = () => {
               <DatePicker
                 className="border p-2 rounded-md"
                 selected={startDate}
+                name="deadline"
                 onChange={(date) => setStartDate(date)}
               />
             </div>
