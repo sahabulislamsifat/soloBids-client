@@ -1,9 +1,74 @@
-import { useState } from "react";
+import axios from "axios";
+import { useContext, useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useNavigate, useParams } from "react-router-dom";
+import { AuthContext } from "../providers/AuthProvider";
+import toast from "react-hot-toast";
 
 const UpdateJob = () => {
+  const { id } = useParams();
   const [startDate, setStartDate] = useState(new Date());
+  const [job, setJob] = useState({});
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const { job_title, category, description, min_price, max_price } = job || {};
+
+  useEffect(() => {
+    fetchSingleJob();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const fetchSingleJob = async () => {
+    const { data } = await axios.get(
+      `${import.meta.env.VITE_API_URL}/job-update/${id}`
+    );
+    // console.log(data.deadline);
+    setJob(data);
+    setStartDate(new Date(data.deadline));
+  };
+
+  // console.log(job);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+
+    const job_title = form.job_title.value;
+    const category = form.category.value;
+    const deadline = startDate;
+    const min_price = parseFloat(form.min_price.value);
+    const max_price = parseFloat(form.max_price.value);
+    const description = form.description.value;
+
+    const fromData = {
+      job_title,
+      buyer: {
+        email: user?.email,
+        name: user?.displayName,
+        photo: user?.photoURL,
+      },
+      category,
+      description,
+      deadline,
+      min_price,
+      max_price,
+      bid_count: user?.bid_count,
+    };
+    // console.log(fromData);
+    try {
+      // make a update request
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/update-job/${id}`,
+        fromData
+      );
+      toast.success("Job Updated Successfully");
+      navigate("/my-posted-jobs");
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
 
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-306px)] my-12">
@@ -12,7 +77,7 @@ const UpdateJob = () => {
           Update a Job
         </h2>
 
-        <form>
+        <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
             <div>
               <label className="text-gray-700 " htmlFor="job_title">
@@ -21,6 +86,7 @@ const UpdateJob = () => {
               <input
                 id="job_title"
                 name="job_title"
+                defaultValue={job_title}
                 type="text"
                 className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded focus:outline-none focus:ring-1"
               />
@@ -34,6 +100,7 @@ const UpdateJob = () => {
                 id="emailAddress"
                 type="email"
                 name="email"
+                defaultValue={user?.email}
                 disabled
                 className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded focus:outline-none focus:ring-1"
               />
@@ -52,15 +119,18 @@ const UpdateJob = () => {
               <label className="text-gray-700 " htmlFor="category">
                 Category
               </label>
-              <select
-                name="category"
-                id="category"
-                className="border p-2 rounded focus:outline-none focus:ring-0"
-              >
-                <option value="Web Development">Web Development</option>
-                <option value="Graphics Design">Graphics Design</option>
-                <option value="Digital Marketing">Digital Marketing</option>
-              </select>
+              {category && (
+                <select
+                  name="category"
+                  id="category"
+                  defaultValue={category}
+                  className="border p-2 rounded focus:outline-none focus:ring-0"
+                >
+                  <option value="Web Development">Web Development</option>
+                  <option value="Graphics Design">Graphics Design</option>
+                  <option value="Digital Marketing">Digital Marketing</option>
+                </select>
+              )}
             </div>
             <div>
               <label className="text-gray-700 " htmlFor="min_price">
@@ -69,6 +139,7 @@ const UpdateJob = () => {
               <input
                 id="min_price"
                 name="min_price"
+                defaultValue={min_price}
                 type="number"
                 className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded focus:outline-none focus:ring-1"
               />
@@ -81,6 +152,7 @@ const UpdateJob = () => {
               <input
                 id="max_price"
                 name="max_price"
+                defaultValue={max_price}
                 type="number"
                 className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded focus:outline-none focus:ring-1"
               />
@@ -93,6 +165,7 @@ const UpdateJob = () => {
             <textarea
               className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded focus:outline-none focus:ring-1"
               name="description"
+              defaultValue={description}
               id="description"
               cols="30"
             ></textarea>

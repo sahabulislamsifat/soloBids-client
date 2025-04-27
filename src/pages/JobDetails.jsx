@@ -1,33 +1,79 @@
-import { useState } from "react";
+import axios from "axios";
+import { format } from "date-fns";
+import { useEffect, useState } from "react";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useParams } from "react-router-dom";
 
 const JobDetails = () => {
+  const { id } = useParams();
   const [startDate, setStartDate] = useState(new Date());
+  const [job, setJob] = useState({});
+
+  useEffect(() => {
+    fetchSingleJob();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const fetchSingleJob = async () => {
+    const { data } = await axios.get(
+      `${import.meta.env.VITE_API_URL}/job-update/${id}`
+    );
+    // console.log(data.deadline);
+    setJob(data);
+    setStartDate(new Date(data.deadline));
+  };
+
+  const {
+    job_title,
+    deadline,
+    category,
+    description,
+    min_price,
+    max_price,
+    buyer,
+  } = job || {};
 
   return (
     <div className="flex flex-col md:flex-row justify-around gap-5  items-center min-h-[calc(100vh-306px)] md:max-w-screen-xl mx-auto ">
       {/* Job Details */}
       <div className="flex-1  px-4 py-7 bg-white rounded shadow-md md:min-h-[350px]">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-light text-gray-800 ">
-            Deadline: 28/05/2024
-          </span>
-          <span className="px-4 py-1 text-xs text-blue-800 uppercase bg-blue-200 rounded-full ">
-            Web Development
+          {deadline && (
+            <span className="text-sm font-light text-gray-800 ">
+              {/* Deadline: 28/05/2024 */}
+              Deadline: {format(new Date(deadline), "P")}
+            </span>
+          )}
+          <span
+            className={`px-4 py-1  text-xs ${
+              category === "Web Development" && "text-blue-500 bg-blue-100/60"
+            }
+            ${
+              category === "Graphics Design" && "text-green-500 bg-green-100/60"
+            }
+            ${
+              category === "Digital Marketing" &&
+              "text-purple-500 bg-purple-100/60"
+            } uppercase rounded-full `}
+          >
+            {/* Web Development */}
+            {category}
           </span>
         </div>
 
         <div>
           <h1 className="mt-2 text-3xl font-semibold text-gray-800 ">
-            Web Development
+            {/* Web Development */}
+            {job_title}
           </h1>
 
           <p className="mt-2 text-lg text-gray-600 ">
-            Dramatically redefine bleeding-edge infrastructures after
+            {/* Dramatically redefine bleeding-edge infrastructures after
             client-focused value. Intrinsicly seize user-centric partnerships
-            through out-of-the-box architectures. Distinctively.
+            through out-of-the-box architectures. Distinctively. */}
+            {description}
           </p>
           <p className="mt-6 text-sm font-bold text-gray-600 ">
             Buyer Details:
@@ -35,21 +81,22 @@ const JobDetails = () => {
           <div className="flex items-center gap-5">
             <div>
               <p className="mt-2 text-sm  text-gray-600 ">
-                Name: Programming-Hero Instructors
+                Name: {buyer?.name}
               </p>
               <p className="mt-2 text-sm  text-gray-600 ">
-                Email: instructors@programming-hero.com
+                Email: {buyer?.email}
               </p>
             </div>
             <div className="rounded-full object-cover overflow-hidden w-14 h-14">
               <img
-                src="https://i.ibb.co.com/qsfs2TW/Ix-I18-R8-Y-400x400.jpg"
+                // src="https://i.ibb.co.com/qsfs2TW/Ix-I18-R8-Y-400x400.jpg"
+                src={buyer?.photo}
                 alt=""
               />
             </div>
           </div>
           <p className="mt-6 text-lg font-bold text-gray-600 ">
-            Range: $500 - $600
+            Range: ${min_price} - ${max_price}
           </p>
         </div>
       </div>

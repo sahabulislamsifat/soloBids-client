@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { AuthContext } from "../providers/AuthProvider";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { format } from "date-fns";
 
 const MyPostedJobs = () => {
   const { user } = useContext(AuthContext);
@@ -131,7 +132,7 @@ const MyPostedJobs = () => {
 
                       <td className="px-4 py-4 text-sm text-gray-500  whitespace-nowrap">
                         {/* 28/05/2024 */}
-                        {job.deadline}
+                        {format(new Date(job.deadline), "P")}
                       </td>
 
                       <td className="px-4 py-4 text-sm text-gray-500  whitespace-nowrap">
@@ -140,7 +141,18 @@ const MyPostedJobs = () => {
                       <td className="px-4 py-4 text-sm whitespace-nowrap">
                         <div className="flex items-center gap-x-2">
                           <p
-                            className={`px-3 py-1  text-blue-500 bg-blue-100/60 text-xs  rounded-full`}
+                            className={`px-3 py-1  ${
+                              job.category === "Web Development" &&
+                              "text-blue-500 bg-blue-100/60"
+                            }
+                            ${
+                              job.category === "Graphics Design" &&
+                              "text-green-500 bg-green-100/60"
+                            }
+                            ${
+                              job.category === "Digital Marketing" &&
+                              "text-purple-500 bg-purple-100/60"
+                            } text-xs  rounded-full`}
                           >
                             {/* Web Development */}
                             {job.category}
@@ -174,7 +186,7 @@ const MyPostedJobs = () => {
                           </button>
 
                           <Link
-                            to={`/update/1`}
+                            to={`/update/${job._id}`}
                             className="text-gray-500 transition-colors duration-200   hover:text-yellow-500 focus:outline-none"
                           >
                             <svg
