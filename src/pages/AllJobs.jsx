@@ -5,17 +5,28 @@ import axios from "axios";
 
 const AllJobs = () => {
   const [jobs, setJobs] = useState([]);
+  const [filter, setFilter] = useState("");
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("");
 
   useEffect(() => {
+    const fetchAllJobs = async () => {
+      const { data } = await axios.get(
+        `${
+          import.meta.env.VITE_API_URL
+        }/all-jobs?filter=${filter}&search=${search}&sort=${sort}`
+      );
+      setJobs(data);
+    };
     fetchAllJobs();
-  }, []);
+  }, [filter, search, sort]);
 
-  const fetchAllJobs = async () => {
-    const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/jobs`);
-    setJobs(data);
+  // console.log(filter);
+  const handleReset = () => {
+    setFilter("");
+    setSearch("");
+    setSort("");
   };
-
-  // console.log(jobs);
 
   return (
     <div className="container px-6 py-10 mx-auto min-h-[calc(100vh-306px)] flex flex-col justify-between">
@@ -23,8 +34,10 @@ const AllJobs = () => {
         <div className="flex flex-col md:flex-row justify-center items-center gap-5 ">
           <div>
             <select
+              onChange={(e) => setFilter(e.target.value)}
               name="category"
               id="category"
+              value={filter}
               className="border px-4 py-3 focus:outline-none focus:ring-0 rounded"
             >
               <option value="">Filter By Category</option>
@@ -33,26 +46,27 @@ const AllJobs = () => {
               <option value="Digital Marketing">Digital Marketing</option>
             </select>
           </div>
+          <div className="flex overflow-hidden rounded border">
+            <input
+              className="px-6 py-1 text-gray-700 placeholder-gray-500 bg-white focus:outline-none focus:ring-1 rounded"
+              type="text"
+              onChange={(e) => setSearch(e.target.value)}
+              name="search"
+              value={search}
+              placeholder="Enter Job Title"
+              aria-label="Enter Job Title"
+            />
 
-          <form>
-            <div className="flex overflow-hidden rounded border">
-              <input
-                className="px-6 py-1 text-gray-700 placeholder-gray-500 bg-white focus:outline-none focus:ring-1 rounded"
-                type="text"
-                name="search"
-                placeholder="Enter Job Title"
-                aria-label="Enter Job Title"
-              />
-
-              <button className="px-1 md:px-4 py-3 text-sm font-medium tracking-wider text-gray-100 uppercase transition-colors duration-300 transform bg-gray-700 rounded-sm hover:bg-gray-600 focus:bg-gray-600 focus:outline-none">
-                Search
-              </button>
-            </div>
-          </form>
+            <button className="px-1 md:px-4 py-3 text-sm font-medium tracking-wider text-gray-100 uppercase transition-colors duration-300 transform bg-gray-700 rounded-sm hover:bg-gray-600 focus:bg-gray-600 focus:outline-none">
+              Search
+            </button>
+          </div>
           <div>
             <select
               name="category"
               id="category"
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
               className="border px-4 py-3 rounded"
             >
               <option value="">Sort By Deadline</option>
@@ -60,7 +74,10 @@ const AllJobs = () => {
               <option value="asc">Ascending Order</option>
             </select>
           </div>
-          <button className="btn rounded px-4 py-3 hover:bg-red-100">
+          <button
+            onClick={handleReset}
+            className="btn rounded px-4 py-3 hover:bg-red-100"
+          >
             Reset
           </button>
         </div>

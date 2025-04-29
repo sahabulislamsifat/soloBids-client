@@ -41,8 +41,22 @@ const BidRequestTableRow = ({ bid, handleStatusSubmit }) => {
         </div>
       </td>
       <td className="px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">
-        <div className="inline-flex items-center px-3 py-1 rounded-full gap-x-2 bg-yellow-100/60 text-yellow-500">
-          <span className="h-1.5 w-1.5 rounded-full bg-green-500"></span>
+        <div
+          className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${
+            status === "Complete" && "bg-green-100/60 text-green-500"
+          }
+          ${status === "In Progress" && "bg-blue-100/60 text-blue-500"}
+          ${status === "Pending" && "bg-yellow-100/60 text-yellow-500"}
+          ${status === "Reject" && "bg-red-100/60 text-red-500"}`}
+        >
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${
+              status === "Complete" && "bg-green-500"
+            }
+            ${status === "In Progress" && "bg-blue-500"}
+            ${status === "Pending" && "bg-yellow-500"}
+            ${status === "Reject" && "bg-red-500"} `}
+          ></span>
           <h2 className="text-sm font-normal ">
             {/* Complete */}
             {status}
@@ -53,6 +67,7 @@ const BidRequestTableRow = ({ bid, handleStatusSubmit }) => {
         <div className="flex items-center gap-x-6">
           {/* Accept Button  */}
           <button
+            disabled={status === "In Progress" || status === "Complete"}
             onClick={() => handleStatusSubmit(_id, status, "In Progress")}
             className="disabled:cursor-not-allowed text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none"
           >
@@ -73,6 +88,7 @@ const BidRequestTableRow = ({ bid, handleStatusSubmit }) => {
           </button>
           {/* Reject Button  */}
           <button
+            disabled={status === "Reject" || status === "Complete"}
             onClick={() => handleStatusSubmit(_id, status, "Reject")}
             className="disabled:cursor-not-allowed text-gray-500 transition-colors duration-200   hover:text-yellow-500 focus:outline-none"
           >

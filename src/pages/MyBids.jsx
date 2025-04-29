@@ -3,8 +3,10 @@ import { AuthContext } from "../providers/AuthProvider";
 import axios from "axios";
 import BidTableRow from "../components/BidTableRow";
 import toast from "react-hot-toast";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 
 const MyBids = () => {
+  const axiosSecure = useAxiosSecure();
   const { user } = useContext(AuthContext);
   const [bids, setBids] = useState([]);
 
@@ -14,9 +16,7 @@ const MyBids = () => {
   }, [user]);
 
   const fetchAllBids = async () => {
-    const { data } = await axios.get(
-      `${import.meta.env.VITE_API_URL}/bids/${user?.email}`
-    );
+    const { data } = await axiosSecure.get(`/bids/${user?.email}`);
     setBids(data);
   };
 
@@ -26,11 +26,8 @@ const MyBids = () => {
     if (previousStatus !== "In Progress") return toast.error("Not Allow!!");
 
     try {
-      const { data } = await axios.patch(
-        `${import.meta.env.VITE_API_URL}/update-bid-status/${id}`,
-        { status }
-      );
-      console.log(data);
+      await axiosSecure.patch(`/update-bid-status/${id}`, { status });
+      toast.success(`Status change to ${status}`);
       // UI Refresh
       fetchAllBids();
     } catch (err) {
