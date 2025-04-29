@@ -27,7 +27,9 @@ const Navbar = () => {
 
           {!user && (
             <li>
-              <Link to="/login">Login</Link>
+              <NavLink className="rounded-sm" to="/login">
+                Login
+              </NavLink>
             </li>
           )}
         </ul>

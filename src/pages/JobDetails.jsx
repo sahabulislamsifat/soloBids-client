@@ -1,15 +1,19 @@
 import axios from "axios";
-import { format } from "date-fns";
-import { useEffect, useState } from "react";
+import { compareAsc, format } from "date-fns";
+import { useContext, useEffect, useState } from "react";
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { AuthContext } from "../providers/AuthProvider";
+import toast from "react-hot-toast";
 
 const JobDetails = () => {
   const { id } = useParams();
   const [startDate, setStartDate] = useState(new Date());
   const [job, setJob] = useState({});
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchSingleJob();
@@ -22,7 +26,7 @@ const JobDetails = () => {
     );
     // console.log(data.deadline);
     setJob(data);
-    setStartDate(new Date(data.deadline));
+    // setStartDate(new Date(data.deadline));
   };
 
   const {
@@ -33,7 +37,57 @@ const JobDetails = () => {
     min_price,
     max_price,
     buyer,
+    _id,
   } = job || {};
+
+  // Place A  Bid
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const price = Number(form.price.value);
+    const email = user?.email;
+    const comment = form.comment.value;
+    const jobId = _id;
+    // const deadline = startDate;
+
+    // 0. Check bid permissions validation
+    if (user?.email === buyer?.email)
+      return toast.error("Action not permitted!");
+
+    // 1. Deadline crossed validation
+    if (compareAsc(new Date(), new Date(deadline)) === 1)
+      return toast.error("Deadline Crossed, Bidding Forbidden!");
+
+    // 2. Price within maximum price range validation
+    if (price > max_price)
+      return toast.error("Offer less or at least equal to maximum price!");
+
+    // 3. offered deadline is within sellers deadline validation
+    if (compareAsc(new Date(startDate), new Date(deadline)) === 1)
+      return toast.error("Offer a date within deadline");
+
+    const bidData = {
+      job_title,
+      price,
+      email,
+      comment,
+      offer_deadline: startDate,
+      jobId,
+      category,
+      status: "Pending",
+      buyer: buyer?.email,
+    };
+
+    try {
+      // make a post request
+      await axios.post(`${import.meta.env.VITE_API_URL}/add-bid`, bidData);
+      form.reset();
+      toast.success("Bid Placed Successful");
+      navigate("/my-bids");
+    } catch (err) {
+      toast.error(err.response.data);
+    }
+  };
 
   return (
     <div className="flex flex-col md:flex-row justify-around gap-5  items-center min-h-[calc(100vh-306px)] md:max-w-screen-xl mx-auto ">
@@ -89,6 +143,7 @@ const JobDetails = () => {
             </div>
             <div className="rounded-full object-cover overflow-hidden w-14 h-14">
               <img
+                referrerPolicy="no-referrer"
                 // src="https://i.ibb.co.com/qsfs2TW/Ix-I18-R8-Y-400x400.jpg"
                 src={buyer?.photo}
                 alt=""
@@ -106,7 +161,7 @@ const JobDetails = () => {
           Place A Bid
         </h2>
 
-        <form>
+        <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
             <div>
               <label className="text-gray-700 " htmlFor="price">
@@ -129,6 +184,7 @@ const JobDetails = () => {
                 id="emailAddress"
                 type="email"
                 name="email"
+                defaultValue={user?.email}
                 disabled
                 className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded focus:outline-none focus:ring-1"
               />
@@ -146,7 +202,7 @@ const JobDetails = () => {
               />
             </div>
             <div className="flex flex-col gap-2 ">
-              <label className="text-gray-700">Deadline</label>
+              <label className="text-gray-700">Offer Deadline</label>
 
               {/* Date Picker Input Field */}
               <DatePicker

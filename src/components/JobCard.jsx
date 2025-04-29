@@ -14,6 +14,8 @@ const JobCard = ({ job }) => {
     _id,
   } = job || {};
 
+  // console.log(job);
+
   return (
     <Link
       to={`/job/${_id}`}
@@ -24,10 +26,20 @@ const JobCard = ({ job }) => {
           {/* Deadline: 28/05/2024 */}
           Deadline: {format(new Date(deadline), "P")}
         </span>
-        <span className="px-3 py-1 text-[8px] text-blue-800 uppercase bg-blue-200 rounded-full ">
+
+        {/* Web Development */}
+        <p
+          className={`px-3 py-1  ${
+            category === "Web Development" && "text-blue-500 bg-blue-100/60"
+          }
+         ${category === "Graphics Design" && "text-green-500 bg-green-100/60"}
+        ${
+          category === "Digital Marketing" && "text-purple-500 bg-purple-100/60"
+        } text-xs  rounded-full`}
+        >
           {/* Web Development */}
           {category}
-        </span>
+        </p>
       </div>
 
       <div>
