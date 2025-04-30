@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../providers/AuthProvider";
-import axios from "axios";
 import BidTableRow from "../components/BidTableRow";
 import toast from "react-hot-toast";
 import useAxiosSecure from "../hooks/useAxiosSecure";
